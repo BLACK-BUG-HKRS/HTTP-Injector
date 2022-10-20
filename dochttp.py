@@ -1,3 +1,5 @@
+from ast import main
+import queue
 from scapy.all import *
 from colorama import init, Fore
 import netfilterqueue
@@ -43,4 +45,10 @@ def process_packet(packet):
         # accept all packets
         packet.accept()
 
+if __name__ == "__main__":
+    queue = netfilterqueue.NetfilterQueue()
+
+    queue.bind(0, process_packet)
+
+    queue.run()
         
