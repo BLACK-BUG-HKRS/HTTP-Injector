@@ -40,4 +40,7 @@ def process_packet(packet):
 
             packet.set_payload(bytes(spacket))
 
+        # accept all packets
+        packet.accept()
+
         
