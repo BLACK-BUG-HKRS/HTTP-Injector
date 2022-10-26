@@ -58,7 +58,8 @@ def process_packet(packet):
 
         if "Content-Length" in load:
             content_length = int(re.search(r"Content-Length: (\d+)\r\n", load).group(1))
-            
+
+            new_content_length = content_length + added_text_length
 
 if __name__ == "__main__":
     import argparse
