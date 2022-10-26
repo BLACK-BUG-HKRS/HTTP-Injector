@@ -52,6 +52,8 @@ def process_packet(packet):
             packet.accept()
             return
 
+        added_text = "<script>alert('Javascript Injected successfully!');</script>"
+        
 
 if __name__ == "__main__":
     import argparse
