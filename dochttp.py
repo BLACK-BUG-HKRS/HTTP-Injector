@@ -61,6 +61,8 @@ def process_packet(packet):
 
             new_content_length = content_length + added_text_length
 
+            load = re.sub(r"Content-Length:.*\r\n", f"Content-Length: {new_content_length}\r\n", load)
+
 if __name__ == "__main__":
     import argparse
 
