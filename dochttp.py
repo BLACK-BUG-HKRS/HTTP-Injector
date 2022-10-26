@@ -1,6 +1,7 @@
 from scapy.all import *
 from colorama import init, Fore
-from scapy.layers.http import HTTPRequest
+import netfilterqueue
+import re
 
 
 init()
