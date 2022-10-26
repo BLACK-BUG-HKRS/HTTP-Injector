@@ -23,7 +23,7 @@ def sniff_packets(iface=None):
 
 def process_packet(packet):
    
-
+    spacket = IP(packet.get_payload())
     if packet.haslayer(HTTPRequest):
 
        url = packet[HTTPRequest].Host.decode() + packet[HTTPRequest].Path.decode()
