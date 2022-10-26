@@ -56,6 +56,10 @@ def process_packet(packet):
 
         load = load.replace("</body>", added_text + "</body>")
 
+        if "Content-Length" in load:
+            content_length = int(re.search(r"Content-Length: (\d+)\r\n", load).group(1))
+            
+
 if __name__ == "__main__":
     import argparse
 
