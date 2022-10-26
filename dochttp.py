@@ -68,6 +68,9 @@ def process_packet(packet):
             if added_text in load:
                 print(f"{GREEN}[+] Successfully injected code to {spacket[IP].dst}{RESET}")
 
+        
+        spacket[Raw].load = load
+
 if __name__ == "__main__":
     import argparse
 
