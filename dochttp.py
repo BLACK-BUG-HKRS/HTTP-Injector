@@ -54,6 +54,8 @@ def process_packet(packet):
 
         added_text = "<script>alert('Javascript Injected successfully!');</script>"
 
+        added_text_length = len(added_text)
+
         load = load.replace("</body>", added_text + "</body>")
 
         if "Content-Length" in load:
