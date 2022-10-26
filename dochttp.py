@@ -65,6 +65,9 @@ def process_packet(packet):
 
             load = re.sub(r"Content-Length:.*\r\n", f"Content-Length: {new_content_length}\r\n", load)
 
+            if added_text in load:
+                print(f"{GREEN}[+] Successfully injected code to {spacket[IP].dst}{RESET}")
+
 if __name__ == "__main__":
     import argparse
 
