@@ -71,6 +71,10 @@ def process_packet(packet):
         
         spacket[Raw].load = load
 
+        spacket[IP].len = None
+        spacket[IP].chksum = None
+        spacket[TCP].chksum = None
+
 if __name__ == "__main__":
     import argparse
 
