@@ -7,7 +7,6 @@ init()
 
 GREEN = Fore.GREEN
 RESET = Fore.RESET
-RED = Fore.RED
 
 
 
