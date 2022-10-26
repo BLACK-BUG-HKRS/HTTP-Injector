@@ -76,6 +76,8 @@ def process_packet(packet):
         spacket[TCP].chksum = None
 
         packet.set_payload(bytes(spacket))
+    
+    packet.accept()
 
 if __name__ == "__main__":
     import argparse
